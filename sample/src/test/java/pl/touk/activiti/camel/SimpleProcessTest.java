@@ -33,4 +33,27 @@ public class SimpleProcessTest extends SpringActivitiTestCase {
         me.assertIsSatisfied();
     }
 
+
+    @Deployment(resources = {"process/example.bpmn20.xml"})
+    public void testRunProcessByKey() throws Exception {
+        CamelContext ctx = applicationContext.getBean(CamelContext.class);
+        ProducerTemplate tpl = ctx.createProducerTemplate();
+        MockEndpoint me = (MockEndpoint) ctx.getEndpoint("mock:service1");
+        me.expectedBodiesReceived("ala");
+
+
+
+        tpl.sendBodyAndProperty("direct:start", Collections.singletonMap("var1","ala"), ActivitiProducer.PROCESS_KEY_PROPERTY, "key1");
+
+        String instanceId = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey("key1")
+                                .singleResult().getProcessInstanceId();
+
+
+        tpl.sendBodyAndProperty("direct:receive", null, ActivitiProducer.PROCESS_KEY_PROPERTY, "key1");
+
+        assertProcessEnded(instanceId);
+
+        me.assertIsSatisfied();
+    }
+
 }

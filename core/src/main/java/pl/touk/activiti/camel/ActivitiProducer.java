@@ -6,6 +6,7 @@ package pl.touk.activiti.camel;
 
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.Execution;
+import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultProducer;
@@ -38,7 +39,8 @@ public class ActivitiProducer extends DefaultProducer {
     @Override
     public void process(Exchange exchange) throws Exception {
         if (shouldStartProcess()) {
-            startProcee(exchange);
+            ProcessInstance pi = startProcess(exchange);
+            exchange.getOut().setBody(pi.getId());
         } else {
             signal(exchange);
         }
@@ -49,19 +51,33 @@ public class ActivitiProducer extends DefaultProducer {
     }
 
     private void signal(Exchange exchange) {
-        String processId = exchange.getProperty(PROCESS_ID_PROPERTY, String.class);
-
+        String processInstanceId = findProcessInstanceId(exchange);
         Execution execution = runtimeService.createExecutionQuery()
-                .processInstanceId(processId)
                 .processDefinitionKey(processKey)
-                .activityId(activity)
-                .singleResult();
+                .processInstanceId(processInstanceId)
+                .activityId(activity).singleResult();
+
         if (execution == null) {
-            throw new RuntimeException("Couldn't find activity for processId "+processId);
+            throw new RuntimeException("Couldn't find activity for processId "+processInstanceId);
         }
         runtimeService.setVariables(execution.getId(), prepareVariables(exchange));
         runtimeService.signal(execution.getId());
 
+    }
+
+    private String findProcessInstanceId(Exchange exchange) {
+        String processInstanceId = exchange.getProperty(PROCESS_ID_PROPERTY, String.class);
+        if (processInstanceId != null) {
+            return processInstanceId;
+        }
+        String processInstanceKey = exchange.getProperty(PROCESS_KEY_PROPERTY, String.class);
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceBusinessKey(processInstanceKey).singleResult();
+
+        if (processInstance == null) {
+            throw new RuntimeException("Could not find activit with key "+processInstanceKey);
+        }
+        return processInstance.getId();
     }
 
 
@@ -88,10 +104,5 @@ public class ActivitiProducer extends DefaultProducer {
         return ret;
     }
 
-    private void startProcee(Exchange exchange) {
-        ProcessInstance pi = startProcess(exchange);
-        exchange.getOut().setBody(pi.getId());
-
-    }
 
 }

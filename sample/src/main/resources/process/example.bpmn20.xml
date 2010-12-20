@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
-  ~ Copyright TouK (c) 2010.
-  -->
-
 <definitions id="definitions"
              xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
              xmlns:activiti="http://activiti.org/bpmn"
