@@ -9,12 +9,19 @@ import org.activiti.spring.impl.test.SpringActivitiTestCase;
 import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.junit.Before;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Collections;
 
 @ContextConfiguration("classpath:camel-activiti-context.xml")
 public class SimpleProcessTest extends SpringActivitiTestCase {
+
+    public void setUp() {
+        CamelContext ctx = applicationContext.getBean(CamelContext.class);
+        MockEndpoint me = (MockEndpoint) ctx.getEndpoint("mock:service1");
+        me.reset();
+    }
 
     @Deployment(resources = {"process/example.bpmn20.xml"})
     public void testRunProcess() throws Exception {
