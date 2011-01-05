@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pl.touk.camel.activiti</groupId>
     <artifactId>core</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <name>Camel Activiti - core</name>
 

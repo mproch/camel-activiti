@@ -12,8 +12,11 @@
 
     <properties>
         <log4j.version>1.2.15</log4j.version>
-        <springVersion>3.0.3.RELEASE</springVersion>
-        <activiti.version>5.1-SNAPSHOT</activiti.version>
+        <springVersion>3.0.4.RELEASE</springVersion>
+        <activiti.version>5.2-SNAPSHOT</activiti.version>
+                <camel.activiti.osgi.export>pl.touk.activiti.*</camel.activiti.osgi.export>
+        <camel.activiti.osgi.import>*</camel.activiti.osgi.import>
+        <camel.activiti.osgi.dynamic.import></camel.activiti.osgi.dynamic.import>
     </properties>
 
     <build>
@@ -30,14 +33,50 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.ops4j</groupId>
+                <artifactId>maven-pax-plugin</artifactId>
+                <version>1.4</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.0.1</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>${camel.activiti.osgi.export}</Export-Package>
+                        <Import-Package>${camel.activiti.osgi.import}</Import-Package>
+			<Require-Bundle></Require-Bundle>
+                        <DynamicImport-Package>${camel.activiti.dynamic.import}</DynamicImport-Package>
+                        <Implementation-Title>WJUG Activiti sample project</Implementation-Title>
+                        <Implementation-Version>${project.version}</Implementation-Version>
+                        <_include>-osgi.bnd</_include>
+
+                    </instructions>
+                </configuration>
+            </plugin>
+
         </plugins>
 
     </build>
 
+
     <modules>
         <module>core</module>
-        <module>sample</module>
+	<module>sample</module>
     </modules>
+
+<repositories>
+  <repository>
+      <id>Activiti</id>
+      <url>http://maven.alfresco.com/nexus/content/repositories/activiti/</url>
+   </repository>
+</repositories>
+
 
     <dependencyManagement>
         <dependencies>
@@ -113,7 +152,7 @@
             <dependency>
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-spring</artifactId>
-                <version>2.4.0</version>
+                <version>2.5.0</version>
             </dependency>
 
       <dependency>
@@ -121,6 +160,13 @@
         <artifactId>h2</artifactId>
         <version>1.2.132</version>
       </dependency>
+      <dependency>
+
+    <groupId>org.activiti</groupId>
+    <artifactId>activiti-designer-integration</artifactId>
+    <version>0.6.0</version> <!-- Current Activiti Designer Version -->
+  </dependency>
         </dependencies>
+
     </dependencyManagement>
 </project>
